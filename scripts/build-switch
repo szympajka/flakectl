@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+build() {
+  export NIXPKGS_ALLOW_UNFREE=1
+  info "Starting build..."
+  nix --extra-experimental-features 'nix-command flakes' build ".#${NIXAPPS_FLAKE_ATTR}" "$@"
+}
+
+switch() {
+  info "Switching to new generation..."
+  sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM_TYPE}" "$@"
+
+  info "Cleaning up..."
+  unlink ./result
+}
+
+tag_generation() {
+  local gen_num branch tag
+  gen_num=$(basename "$(readlink /nix/var/nix/profiles/system)" | sed 's/system-\(.*\)-link/\1/')
+  branch=$(git branch --show-current)
+  tag="gen-${branch}-${gen_num}"
+
+  if ! git tag -l "$tag" | grep -q .; then
+    git tag -m "Generation ${gen_num}" "$tag"
+    git push origin "$tag" > /dev/null 2>&1 || error "Warning: Failed to push tag to remote"
+    success "Tagged commit as ${tag}"
+  else
+    info "Tag ${tag} already exists, skipping"
+  fi
+}
+
+main() {
+  ensure_clean_tree || exit 1
+  build "$@"
+  switch "$@"
+  tag_generation
+  success "Switch to new generation complete!"
+}
+
+main "$@"

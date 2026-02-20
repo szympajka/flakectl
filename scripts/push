@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+show_commits() {
+  local branch ahead
+  branch=$(git branch --show-current)
+  ahead=$(git log --oneline "origin/${branch}..HEAD" 2>/dev/null)
+
+  if [ -z "$ahead" ]; then
+    info "No local commits ahead of origin/${branch}."
+    return 1
+  fi
+
+  info "Commits to push (${branch}):"
+  echo "$ahead" | sed 's/^/  /'
+  echo ""
+}
+
+main() {
+  show_commits || exit 0
+
+  local branch
+  branch=$(git branch --show-current)
+
+  choice=$(gum choose --header "Push to origin/${branch}?" "Push" "Abort")
+
+  if [ "$choice" = "Push" ]; then
+    git push origin "$branch"
+    success "Pushed to origin/${branch}!"
+  else
+    info "Aborted."
+  fi
+}
+
+main

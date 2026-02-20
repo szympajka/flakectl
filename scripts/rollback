@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+select_generation() {
+  info "Available generations:"
+  /run/current-system/sw/bin/darwin-rebuild --list-generations
+
+  info "Enter the generation number for rollback:"
+  read -r GEN_NUM
+
+  if [ -z "$GEN_NUM" ]; then
+    error "No generation number entered. Aborting rollback."
+    return 1
+  fi
+
+  echo "$GEN_NUM"
+}
+
+rollback_to() {
+  local gen_num="$1"
+  info "Rolling back to generation ${gen_num}..."
+  /run/current-system/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM_TYPE}" --switch-generation "$gen_num"
+  success "Rollback to generation ${gen_num} complete!"
+}
+
+hint_git_tag() {
+  local gen_num="$1"
+  local branch tag
+  branch=$(git branch --show-current)
+  tag="gen-${branch}-${gen_num}"
+
+  if git tag -l "$tag" | grep -q .; then
+    info "To restore nix config: git checkout ${tag}"
+  else
+    info "No git tag found for generation ${gen_num} on branch ${branch}"
+  fi
+}
+
+main() {
+  local gen_num
+  gen_num=$(select_generation) || exit 1
+  rollback_to "$gen_num"
+  hint_git_tag "$gen_num"
+}
+
+main

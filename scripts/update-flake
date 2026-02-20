@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+get_inputs() {
+  nix flake metadata --json 2>/dev/null | jq -r '.locks.nodes.root.inputs | keys[]' | sort
+}
+
+run_updaters() {
+  local updaters_dir="$PWD/scripts/updaters"
+  if [ -d "$updaters_dir" ] && ls "$updaters_dir"/*.sh &>/dev/null; then
+    echo ""
+    echo " ● Running custom updaters..."
+    for script in "$updaters_dir"/*.sh; do
+      echo "   → $(basename "$script" .sh)"
+      bash "$script"
+    done
+    echo " ✓ Updaters complete!"
+  fi
+}
+
+usage() {
+  echo "Usage: update-flake [input-names...]"
+  echo ""
+  echo "Examples:"
+  echo "  update-flake              # Interactive mode"
+  echo "  update-flake nixpkgs      # Update nixpkgs only"
+  echo "  update-flake --all        # Update all inputs"
+}
+
+update_selected() {
+  for input in "$@"; do
+    nix flake update "$input"
+  done
+  run_updaters
+}
+
+update_all() {
+  nix flake update
+  run_updaters
+}
+
+interactive_update() {
+  echo ""
+  echo " flake   Update sequence initiated."
+  echo ""
+
+  local mode
+  mode=$(gum choose --header "What would you like to update?" \
+    --cursor.foreground="212" \
+    "Select specific inputs (recommended)" \
+    "Update all inputs" \
+    "Quick update (nixpkgs only)")
+
+  case "$mode" in
+    "Update all inputs")
+      gum spin --spinner dot --title "Updating all inputs..." -- nix flake update
+      echo " ✓ Complete!"
+      run_updaters
+      return
+      ;;
+    "Quick update (nixpkgs only)")
+      gum spin --spinner dot --title "Updating nixpkgs..." -- nix flake update nixpkgs
+      echo " ✓ Complete!"
+      run_updaters
+      return
+      ;;
+  esac
+
+  mapfile -t inputs < <(get_inputs)
+  local selected
+  selected=$(gum choose --no-limit \
+    --header "Select inputs to update:" \
+    --height 20 \
+    --cursor.foreground="212" \
+    --selected.foreground="2" \
+    --cursor-prefix="● " \
+    --unselected-prefix="○ " \
+    --selected-prefix="✓ " \
+    "${inputs[@]}")
+
+  if [ -z "$selected" ]; then
+    echo "No inputs selected. Exiting."
+    return 0
+  fi
+
+  echo ""
+  echo " ● Updating: $selected"
+  echo ""
+
+  while IFS= read -r input; do
+    nix flake update "$input"
+  done <<< "$selected"
+
+  echo ""
+  echo " ✓ Complete!"
+  run_updaters
+}
+
+main() {
+  require_flake
+
+  if [ $# -gt 0 ]; then
+    case "$1" in
+      --help|-h) usage; exit 0 ;;
+      --all) update_all; exit 0 ;;
+      *) update_selected "$@"; exit 0 ;;
+    esac
+  fi
+
+  interactive_update
+}
+
+main "$@"

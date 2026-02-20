@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -e
+source "$(dirname "$0")/lib.sh"
+
+get_apps() {
+  nix flake show --json 2>/dev/null | jq -r ".apps.\"${NIXAPPS_SYSTEM_TYPE}\" | keys[]" | grep -v '^menu$' | sort
+}
+
+run_menu() {
+  while true; do
+    echo ""
+    echo " ⚡ App Menu"
+    echo ""
+
+    mapfile -t apps < <(get_apps)
+    apps+=("Quit")
+
+    selection=$(gum choose --header "Select an app to run:" \
+      --cursor.foreground="212" \
+      "${apps[@]}")
+
+    if [ "$selection" = "Quit" ]; then
+      echo "Bye!"
+      return 0
+    fi
+
+    echo ""
+    nix run ".#${selection}"
+    echo ""
+  done
+}
+
+main() {
+  require_flake
+  run_menu
+}
+
+main
