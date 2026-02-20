@@ -9,10 +9,8 @@ build() {
 }
 
 switch() {
-  local cmd
-  cmd=$(rebuild_cmd)
-
   info "Switching to new generation..."
+  # darwin needs sudo + local result binary (see https://github.com/nix-darwin/nix-darwin/issues/1457)
   if [ "$NIXAPPS_PLATFORM" = "darwin" ]; then
     sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM}" "$@"
   else
