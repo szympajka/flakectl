@@ -29,31 +29,20 @@ rebuild_cmd() {
 
 # --- Git commit suggestion helpers ---
 
-# Infer scope for a single changed file path.
-# modules/<sub>/... → sub, known dirs → dir name, root .nix → basename.
-# Prints "?" for unmapped paths — override NIXAPPS_SCOPE_DIRS to extend.
+# Infer scope from a file path: parent directory name for nested files, basename for root files.
 infer_scope() {
   local path="$1"
   case "$path" in
-    modules/*/*) echo "$path" | sed 's|^modules/\([^/]*\)/.*|\1|' ;;
-    *.nix)       basename "$path" .nix ;;
-    */*)         echo "$path" | sed 's|^\([^/]*\)/.*|\1|' ;;
-    *)           echo "?" ;;
+    */*) basename "$(dirname "$path")" ;;
+    *)   basename "$path" .nix ;;
   esac
 }
 
 suggest_commit_message() {
   local changed="$1"
-  local scopes scope unknown subjects
+  local scopes scope subjects
 
   scopes=$(while IFS= read -r f; do infer_scope "$f"; done <<< "$changed" | sort -u)
-  unknown=$(echo "$scopes" | grep -c '^?$' || true)
-
-  if [ "$unknown" -gt 0 ]; then
-    info "Warning: some paths could not be mapped to a scope"
-  fi
-
-  scopes=$(echo "$scopes" | grep -v '^?$' || true)
 
   if [ "$(echo "$scopes" | wc -l | tr -d ' ')" -eq 1 ] && [ -n "$scopes" ]; then
     scope="(${scopes})"
