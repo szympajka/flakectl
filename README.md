@@ -79,3 +79,22 @@ nix-apps.platform = "nixos";
 | `NIXAPPS_SYSTEM` | Nix system string | `aarch64-darwin` |
 | `NIXAPPS_PLATFORM` | `darwin` or `nixos` | `darwin` |
 | `NIXAPPS_FLAKE_ATTR` | Flake attribute to build | `darwinConfigurations.aarch64-darwin.system` |
+
+## Commit suggestion
+
+When `build-switch` detects a dirty git tree, it suggests a conventional commit message based on changed file paths. Scope is inferred from the parent directory:
+
+| Changed file | Suggested scope |
+|---|---|
+| `modules/darwin/homebrew/casks.nix` | `homebrew` |
+| `modules/darwin/services.nix` | `darwin` |
+| `apps/aarch64-darwin/build` | `aarch64-darwin` |
+| `flake.nix` | `flake` |
+
+Multiple files in the same scope → single scoped message. Mixed scopes → scope omitted.
+
+## Testing
+
+```bash
+bash tests/lib_test.sh
+```
