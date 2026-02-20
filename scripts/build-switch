@@ -2,23 +2,23 @@
 set -e
 source "$(dirname "$0")/lib.sh"
 
-build() {
+build_and_switch() {
   export NIXPKGS_ALLOW_UNFREE=1
-  info "Starting build..."
-  nix --extra-experimental-features 'nix-command flakes' build ".#${FLAKECTL_FLAKE_ATTR}" "$@"
-}
 
-switch() {
-  info "Switching to new generation..."
-  # darwin needs sudo + local result binary (see https://github.com/nix-darwin/nix-darwin/issues/1457)
   if [ "$FLAKECTL_PLATFORM" = "darwin" ]; then
+    info "Building..."
+    nix --extra-experimental-features 'nix-command flakes' build ".#${FLAKECTL_FLAKE_ATTR}" "$@"
+
+    info "Switching to new generation..."
+    # darwin needs sudo + local result binary (see https://github.com/nix-darwin/nix-darwin/issues/1457)
     sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${FLAKECTL_SYSTEM}" "$@"
+
+    info "Cleaning up..."
+    unlink ./result 2>/dev/null || true
   else
+    info "Switching to new generation..."
     sudo nixos-rebuild switch --flake ".#${FLAKECTL_SYSTEM}" "$@"
   fi
-
-  info "Cleaning up..."
-  unlink ./result 2>/dev/null || true
 }
 
 tag_generation() {
@@ -38,8 +38,7 @@ tag_generation() {
 
 main() {
   ensure_clean_tree || exit 1
-  build "$@"
-  switch "$@"
+  build_and_switch "$@"
   tag_generation
   success "Switch to new generation complete!"
 }

@@ -18,11 +18,11 @@ require_flake() {
   fi
 }
 
-# Platform-aware rebuild command.
+# Platform-aware rebuild command path.
 rebuild_cmd() {
   case "${FLAKECTL_PLATFORM:-}" in
     darwin) echo "/run/current-system/sw/bin/darwin-rebuild" ;;
-    nixos)  echo "sudo nixos-rebuild" ;;
+    nixos)  echo "nixos-rebuild" ;;
     *)      error "Unknown platform: ${FLAKECTL_PLATFORM:-unset}"; exit 1 ;;
   esac
 }

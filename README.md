@@ -4,6 +4,10 @@ A configurable app framework for Nix flakes. Provides interactive build, switch,
 
 Works with both nix-darwin and NixOS — platform is auto-detected from your system type.
 
+## Credits
+
+This project grew out of [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config), which provided the original app scripts and multi-system structure that inspired this framework. If you're looking for a great starting point for your own nix configuration, check it out.
+
 ## Usage
 
 Add to your `flake.nix`:
