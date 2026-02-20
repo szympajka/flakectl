@@ -6,9 +6,9 @@ Works with both nix-darwin and NixOS. Platform is auto-detected from your system
 
 > **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified. If you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
 
-## Standing on the shoulders of giants
+## Credits
 
-This project is a love letter to [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). Dustin's repo is where my entire Nix journey started. I forked it, learned from it, broke it, rebuilt it, and eventually grew it into something of my own. The app scripts, the multi-architecture layout, the idea of managing darwin and NixOS from a single flake, that's all Dustin. flakectl is what happened when I kept pulling at those threads. Go star his repo, seriously. ⭐
+Built on top of [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). Dustin's project was instrumental in me falling in love with Nix. I started tweaking his app scripts to my liking, and that's how flakectl was born.
 
 ## Usage
 
