@@ -46,6 +46,21 @@ in {
         default = [];
         description = "Extra packages to add to the app scripts PATH.";
       };
+
+      cli = {
+        enable = lib.mkEnableOption "global flakectl CLI command";
+
+        name = lib.mkOption {
+          type = lib.types.str;
+          default = "flakectl";
+          description = "Name of the global CLI command.";
+        };
+
+        flakePath = lib.mkOption {
+          type = lib.types.str;
+          description = "Absolute path to your flake directory, e.g. /Users/you/nixos-config";
+        };
+      };
     };
 
     config = let
@@ -74,9 +89,14 @@ in {
       }) cfg.enabledApps);
 
       extraAppSet = lib.mapAttrs (name: path: wrapScript name (toString path)) cfg.extraApps;
+
+      cliPackage = pkgs.writeShellScriptBin cfg.cli.name ''
+        cd ${lib.escapeShellArg cfg.cli.flakePath} && nix run ".#''${1:-menu}" -- "''${@:2}"
+      '';
     in
       lib.mkIf cfg.enable {
         apps = builtinAppSet // extraAppSet;
+        packages.${cfg.cli.name} = lib.mkIf cfg.cli.enable cliPackage;
       };
   });
 }
