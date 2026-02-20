@@ -8,7 +8,7 @@ Works with both nix-darwin and NixOS — platform is auto-detected from your sys
 
 ## Credits
 
-This project grew out of [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config), which provided the original app scripts and multi-system structure that inspired this framework. If you're looking for a great starting point for your own nix configuration, check it out.
+This project grew out of [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config) — a beautifully structured, multi-platform nix configuration that I used to bootstrap my own setup. The original app scripts, the per-architecture layout, and the overall approach to managing nix-darwin and NixOS from a single repo all come from Dustin's work. This project wouldn't exist without it. ❤️
 
 ## Usage
 
