@@ -4,6 +4,8 @@ A gum-powered menu that runs your Nix flake for you. Build, switch, rollback, pu
 
 Works with both nix-darwin and NixOS. Platform is auto-detected from your system type.
 
+![demo showing the gum-powered menu in action](demo.gif)
+
 > **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified. If you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
 
 ## Credits
@@ -37,14 +39,14 @@ Then: `nix run .#menu`, `nix run .#build-switch`, etc.
 
 ## Built-in apps
 
-| App | Description |
-|---|---|
-| `menu` | Interactive app picker that auto-discovers all registered apps |
-| `build` | Build only (no switch) |
+| App            | Description                                                       |
+| -------------- | ----------------------------------------------------------------- |
+| `menu`         | Interactive app picker that auto-discovers all registered apps    |
+| `build`        | Build only (no switch)                                            |
 | `build-switch` | Build, switch, tag generation. Suggests a commit if tree is dirty |
-| `rollback` | Roll back to a previous generation |
-| `push` | Review and push local commits to remote |
-| `update-flake` | Interactive or CLI-driven flake input updater |
+| `rollback`     | Roll back to a previous generation                                |
+| `push`         | Review and push local commits to remote                           |
+| `update-flake` | Interactive or CLI-driven flake input updater                     |
 
 ## Customisation
 
@@ -80,22 +82,22 @@ flakectl.platform = "nixos";
 
 ## Environment variables available to scripts
 
-| Variable | Description | Example |
-|---|---|---|
-| `FLAKECTL_SYSTEM` | Nix system string | `aarch64-darwin` |
-| `FLAKECTL_PLATFORM` | `darwin` or `nixos` | `darwin` |
+| Variable              | Description                                   | Example                                      |
+| --------------------- | --------------------------------------------- | -------------------------------------------- |
+| `FLAKECTL_SYSTEM`     | Nix system string                             | `aarch64-darwin`                             |
+| `FLAKECTL_PLATFORM`   | `darwin` or `nixos`                           | `darwin`                                     |
 | `FLAKECTL_FLAKE_ATTR` | Flake attribute to build (from `buildTarget`) | `darwinConfigurations.aarch64-darwin.system` |
 
 ## Commit suggestion
 
 When `build-switch` detects a dirty git tree, it suggests a conventional commit message based on changed file paths. Scope is inferred from the parent directory:
 
-| Changed file | Suggested scope |
-|---|---|
-| `modules/darwin/homebrew/casks.nix` | `homebrew` |
-| `modules/darwin/services.nix` | `darwin` |
-| `apps/aarch64-darwin/build` | `aarch64-darwin` |
-| `flake.nix` | `flake` |
+| Changed file                        | Suggested scope  |
+| ----------------------------------- | ---------------- |
+| `modules/darwin/homebrew/casks.nix` | `homebrew`       |
+| `modules/darwin/services.nix`       | `darwin`         |
+| `apps/aarch64-darwin/build`         | `aarch64-darwin` |
+| `flake.nix`                         | `flake`          |
 
 Multiple files in the same scope → single scoped message. Mixed scopes → scope omitted.
 
