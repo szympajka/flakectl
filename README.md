@@ -2,13 +2,13 @@
 
 A configurable app framework for Nix flakes. Provides interactive build, switch, rollback, push, and update workflows with generation tagging and commit suggestions.
 
-Works with both nix-darwin and NixOS. platform is auto-detected from your system type.
+Works with both nix-darwin and NixOS. Platform is auto-detected from your system type.
 
-> **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified. if you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
+> **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified. If you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
 
 ## Standing on the shoulders of giants
 
-This project is a love letter to [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). Dustin's repo is where my entire Nix journey started. I forked it, learned from it, broke it, rebuilt it, and eventually grew it into something of my own. The app scripts, the multi-architecture layout, the idea of managing darwin and NixOS from a single flake. that's all Dustin. flakectl is what happened when I kept pulling at those threads. Go star his repo, seriously. ⭐
+This project is a love letter to [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). Dustin's repo is where my entire Nix journey started. I forked it, learned from it, broke it, rebuilt it, and eventually grew it into something of my own. The app scripts, the multi-architecture layout, the idea of managing darwin and NixOS from a single flake, that's all Dustin. flakectl is what happened when I kept pulling at those threads. Go star his repo, seriously. ⭐
 
 ## Usage
 
@@ -39,9 +39,9 @@ Then: `nix run .#menu`, `nix run .#build-switch`, etc.
 
 | App | Description |
 |---|---|
-| `menu` | Interactive app picker. auto-discovers all registered apps |
+| `menu` | Interactive app picker that auto-discovers all registered apps |
 | `build` | Build only (no switch) |
-| `build-switch` | Build, switch, tag generation. suggests a commit if tree is dirty |
+| `build-switch` | Build, switch, tag generation. Suggests a commit if tree is dirty |
 | `rollback` | Roll back to a previous generation |
 | `push` | Review and push local commits to remote |
 | `update-flake` | Interactive or CLI-driven flake input updater |
