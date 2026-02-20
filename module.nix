@@ -1,10 +1,6 @@
-{inputs, ...}: {
-  flake-parts,
-  lib,
-  ...
-}: let
+{inputs, ...}: let
+  flake-parts = inputs.flake-parts;
   scriptsDir = ./scripts;
-
   builtinApps = ["build" "build-switch" "menu" "push" "rollback" "update-flake"];
 in {
   options.perSystem = flake-parts.lib.mkPerSystemOption ({
