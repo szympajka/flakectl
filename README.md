@@ -1,24 +1,18 @@
 # flakectl
 
-A small, opinionated TUI for managing your Nix flake. Build, switch, rollback, push, update — all through an interactive [gum](https://github.com/charmbracelet/gum)-powered menu. Tags every generation in git so you always know which commit produced which system state.
+A configurable app framework for Nix flakes. Provides interactive build, switch, rollback, push, and update workflows with generation tagging and commit suggestions.
 
-Works with nix-darwin and NixOS. Platform is auto-detected.
+Works with both nix-darwin and NixOS — platform is auto-detected from your system type.
 
-> I've only tested this on darwin so far. NixOS support is there but unverified — if something's off, please [open an issue](https://github.com/szympajka/flakectl/issues) or send a PR.
+> **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified — if you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
 
-## Why
+## Standing on the shoulders of giants
 
-I got tired of running `nix build`, `darwin-rebuild switch`, tagging, pushing — all manually, every time. I wanted a single `nix run .#menu` that gives me a nice picker and handles the boring bits. I also wanted my git tree to be clean before every build, so flakectl suggests a commit message from the diff when it's not.
+This project is a love letter to [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). Dustin's repo is where my entire Nix journey started — I forked it, learned from it, broke it, rebuilt it, and eventually grew it into something of my own. The app scripts, the multi-architecture layout, the idea of managing darwin and NixOS from a single flake — that's all Dustin. flakectl is what happened when I kept pulling at those threads. Go star his repo, seriously. ⭐
 
-This started as a few shell scripts in my [nix config](https://github.com/szympajka/nixos-config). It grew into something reusable, so here we are.
+## Usage
 
-## Credits
-
-This project wouldn't exist without [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config). I used Dustin's project to bootstrap my own nix setup — the app scripts, the per-architecture layout, the whole approach to managing darwin and NixOS from one repo. It's a fantastic starting point and I can't recommend it enough. ❤️
-
-## Getting started
-
-Add flakectl to your `flake.nix`:
+Add to your `flake.nix`:
 
 ```nix
 {
@@ -32,8 +26,6 @@ Add flakectl to your `flake.nix`:
       perSystem = { system, ... }: {
         flakectl = {
           enable = true;
-          # The flake attribute that produces your system derivation.
-          # For nix-darwin it's typically this. For NixOS: nixosConfigurations.<host>.config.system.build.toplevel
           buildTarget = "darwinConfigurations.${system}.system";
         };
       };
@@ -41,28 +33,28 @@ Add flakectl to your `flake.nix`:
 }
 ```
 
-Then run `nix run .#menu` and pick what you need.
+Then: `nix run .#menu`, `nix run .#build-switch`, etc.
 
 ## Built-in apps
 
-| App | What it does |
+| App | Description |
 |---|---|
-| `menu` | Interactive picker — auto-discovers all registered apps |
-| `build` | Build only, no switch |
-| `build-switch` | Build, switch, tag the generation — suggests a commit if tree is dirty |
+| `menu` | Interactive app picker — auto-discovers all registered apps |
+| `build` | Build only (no switch) |
+| `build-switch` | Build, switch, tag generation — suggests a commit if tree is dirty |
 | `rollback` | Roll back to a previous generation |
-| `push` | Review stacked local commits and push to remote |
-| `update-flake` | Update flake inputs — interactive or via CLI flags |
+| `push` | Review and push local commits to remote |
+| `update-flake` | Interactive or CLI-driven flake input updater |
 
-## Make it yours
+## Customisation
 
-### Pick which apps you want
+### Pick which built-in apps to include
 
 ```nix
 flakectl.enabledApps = [ "build-switch" "push" "menu" ];
 ```
 
-### Add your own
+### Add your own apps
 
 ```nix
 flakectl.extraApps = {
@@ -70,9 +62,9 @@ flakectl.extraApps = {
 };
 ```
 
-Your scripts get the same `PATH` (git, gum, jq) and env vars. They show up in the menu automatically — no extra wiring.
+Custom apps get the same `PATH` (git, gum, jq) and env vars (`FLAKECTL_SYSTEM`, `FLAKECTL_PLATFORM`, `FLAKECTL_FLAKE_ATTR`). They also appear in the menu automatically.
 
-### Extra packages in PATH
+### Add extra packages to PATH
 
 ```nix
 flakectl.extraPackages = [ pkgs.ripgrep ];
@@ -80,31 +72,32 @@ flakectl.extraPackages = [ pkgs.ripgrep ];
 
 ### Override platform detection
 
-Auto-detected from your system string, but you can force it:
+Platform is auto-detected (`*-darwin` → darwin, otherwise → nixos), but you can override:
 
 ```nix
 flakectl.platform = "nixos";
 ```
 
-## How commit suggestion works
+## Environment variables available to scripts
 
-When `build-switch` finds a dirty git tree, it parses the changed file paths and generates a conventional commit message. Scope comes from the parent directory:
+| Variable | Description | Example |
+|---|---|---|
+| `FLAKECTL_SYSTEM` | Nix system string | `aarch64-darwin` |
+| `FLAKECTL_PLATFORM` | `darwin` or `nixos` | `darwin` |
+| `FLAKECTL_FLAKE_ATTR` | Flake attribute to build (from `buildTarget`) | `darwinConfigurations.aarch64-darwin.system` |
 
-- `modules/darwin/homebrew/casks.nix` → `chore(homebrew): update casks`
-- `modules/darwin/services.nix` → `chore(darwin): update services`
-- `flake.nix` → `chore(flake): update flake`
+## Commit suggestion
 
-You can accept it, edit it, or abort. Nothing gets committed without your say-so.
+When `build-switch` detects a dirty git tree, it suggests a conventional commit message based on changed file paths. Scope is inferred from the parent directory:
 
-## Environment variables
-
-Scripts (both built-in and your own) get these:
-
-| Variable | Example |
+| Changed file | Suggested scope |
 |---|---|
-| `FLAKECTL_SYSTEM` | `aarch64-darwin` |
-| `FLAKECTL_PLATFORM` | `darwin` |
-| `FLAKECTL_FLAKE_ATTR` | `darwinConfigurations.aarch64-darwin.system` |
+| `modules/darwin/homebrew/casks.nix` | `homebrew` |
+| `modules/darwin/services.nix` | `darwin` |
+| `apps/aarch64-darwin/build` | `aarch64-darwin` |
+| `flake.nix` | `flake` |
+
+Multiple files in the same scope → single scoped message. Mixed scopes → scope omitted.
 
 ## Testing
 
