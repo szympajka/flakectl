@@ -4,6 +4,8 @@ A configurable app framework for Nix flakes. Provides interactive build, switch,
 
 Works with both nix-darwin and NixOS — platform is auto-detected from your system type.
 
+> **Note:** This project is built for multi-platform support, but has only been tested on darwin (macOS) so far. NixOS support is implemented but unverified — if you run into issues, please [open an issue](https://github.com/szympajka/flakectl/issues) or submit a PR.
+
 ## Credits
 
 This project grew out of [dustinlyons/nixos-config](https://github.com/dustinlyons/nixos-config), which provided the original app scripts and multi-system structure that inspired this framework. If you're looking for a great starting point for your own nix configuration, check it out.
