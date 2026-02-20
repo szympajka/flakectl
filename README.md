@@ -1,6 +1,6 @@
 # flakectl
 
-A configurable app framework for Nix flakes. Provides interactive build, switch, rollback, push, and update workflows with generation tagging and commit suggestions.
+A gum-powered menu that runs your Nix flake for you. Build, switch, rollback, push, update: pick from a list, it handles the rest. Tags every generation in git so you can always trace which commit built which system.
 
 Works with both nix-darwin and NixOS. Platform is auto-detected from your system type.
 
