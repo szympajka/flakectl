@@ -1,4 +1,4 @@
-{inputs, ...}: let
+{inputs}: let
   flake-parts = inputs.flake-parts;
   scriptsDir = ./scripts;
   builtinApps = ["build" "build-switch" "menu" "push" "rollback" "update-flake"];
@@ -13,9 +13,10 @@ in {
     options.nix-apps = {
       enable = lib.mkEnableOption "nix-apps framework";
 
-      flakeAttr = lib.mkOption {
+      buildTarget = lib.mkOption {
         type = lib.types.str;
         description = "Flake attribute to build, e.g. darwinConfigurations.aarch64-darwin.system";
+        example = "darwinConfigurations.aarch64-darwin.system";
       };
 
       platform = lib.mkOption {
@@ -28,7 +29,7 @@ in {
       };
 
       enabledApps = lib.mkOption {
-        type = lib.types.listOf lib.types.str;
+        type = lib.types.listOf (lib.types.enum builtinApps);
         default = builtinApps;
         description = "Which built-in apps to include. Defaults to all.";
       };
@@ -52,25 +53,27 @@ in {
 
       runtimePath = lib.makeBinPath ([pkgs.git pkgs.gum pkgs.jq] ++ cfg.extraPackages);
 
-      mkApp = name: scriptPath: {
-        type = "app";
-        program = "${(pkgs.writeScriptBin name ''
+      wrapScript = name: scriptPath: let
+        wrapper = pkgs.writeScriptBin name ''
           #!/usr/bin/env bash
           export PATH=${runtimePath}:$PATH
           export NIXAPPS_SYSTEM=${lib.escapeShellArg system}
           export NIXAPPS_PLATFORM=${lib.escapeShellArg cfg.platform}
-          export NIXAPPS_FLAKE_ATTR=${lib.escapeShellArg cfg.flakeAttr}
+          export NIXAPPS_FLAKE_ATTR=${lib.escapeShellArg cfg.buildTarget}
           echo "Running ${name} for ${system}"
           exec ${scriptPath} "$@"
-        '')}/bin/${name}";
+        '';
+      in {
+        type = "app";
+        program = "${wrapper}/bin/${name}";
       };
 
       builtinAppSet = lib.listToAttrs (map (name: {
         inherit name;
-        value = mkApp name "${scriptsDir}/${name}";
-      }) (lib.filter (n: lib.elem n cfg.enabledApps) builtinApps));
+        value = wrapScript name "${scriptsDir}/${name}";
+      }) cfg.enabledApps);
 
-      extraAppSet = lib.mapAttrs (name: path: mkApp name (toString path)) cfg.extraApps;
+      extraAppSet = lib.mapAttrs (name: path: wrapScript name (toString path)) cfg.extraApps;
     in
       lib.mkIf cfg.enable {
         apps = builtinAppSet // extraAppSet;

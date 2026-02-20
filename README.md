@@ -20,7 +20,7 @@ Add to your `flake.nix`:
       perSystem = { system, ... }: {
         nix-apps = {
           enable = true;
-          flakeAttr = "darwinConfigurations.${system}.system";
+          buildTarget = "darwinConfigurations.${system}.system";
         };
       };
     };
@@ -78,7 +78,7 @@ nix-apps.platform = "nixos";
 |---|---|---|
 | `NIXAPPS_SYSTEM` | Nix system string | `aarch64-darwin` |
 | `NIXAPPS_PLATFORM` | `darwin` or `nixos` | `darwin` |
-| `NIXAPPS_FLAKE_ATTR` | Flake attribute to build | `darwinConfigurations.aarch64-darwin.system` |
+| `NIXAPPS_FLAKE_ATTR` | Flake attribute to build (from `buildTarget`) | `darwinConfigurations.aarch64-darwin.system` |
 
 ## Commit suggestion
 
