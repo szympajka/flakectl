@@ -1,5 +1,5 @@
 {
-  description = "Configurable app framework for Nix flakes — build, switch, rollback, push, and more.";
+  description = "A gum-powered menu that runs your Nix flake for you.";
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
