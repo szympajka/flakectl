@@ -10,8 +10,8 @@ in {
     config,
     ...
   }: {
-    options.nix-apps = {
-      enable = lib.mkEnableOption "nix-apps framework";
+    options.flakectl = {
+      enable = lib.mkEnableOption "flakectl framework";
 
       buildTarget = lib.mkOption {
         type = lib.types.str;
@@ -49,7 +49,7 @@ in {
     };
 
     config = let
-      cfg = config.nix-apps;
+      cfg = config.flakectl;
 
       runtimePath = lib.makeBinPath ([pkgs.git pkgs.gum pkgs.jq] ++ cfg.extraPackages);
 
@@ -57,9 +57,9 @@ in {
         wrapper = pkgs.writeScriptBin name ''
           #!/usr/bin/env bash
           export PATH=${runtimePath}:$PATH
-          export NIXAPPS_SYSTEM=${lib.escapeShellArg system}
-          export NIXAPPS_PLATFORM=${lib.escapeShellArg cfg.platform}
-          export NIXAPPS_FLAKE_ATTR=${lib.escapeShellArg cfg.buildTarget}
+          export FLAKECTL_SYSTEM=${lib.escapeShellArg system}
+          export FLAKECTL_PLATFORM=${lib.escapeShellArg cfg.platform}
+          export FLAKECTL_FLAKE_ATTR=${lib.escapeShellArg cfg.buildTarget}
           echo "Running ${name} for ${system}"
           exec ${scriptPath} "$@"
         '';

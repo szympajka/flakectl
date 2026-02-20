@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared helpers for nix-apps scripts.
+# Shared helpers for flakectl scripts.
 # Sourced automatically — do not run directly.
 
 GREEN='\033[1;32m'
@@ -20,10 +20,10 @@ require_flake() {
 
 # Platform-aware rebuild command.
 rebuild_cmd() {
-  case "${NIXAPPS_PLATFORM:-}" in
+  case "${FLAKECTL_PLATFORM:-}" in
     darwin) echo "/run/current-system/sw/bin/darwin-rebuild" ;;
     nixos)  echo "sudo nixos-rebuild" ;;
-    *)      error "Unknown platform: ${NIXAPPS_PLATFORM:-unset}"; exit 1 ;;
+    *)      error "Unknown platform: ${FLAKECTL_PLATFORM:-unset}"; exit 1 ;;
   esac
 }
 

@@ -26,7 +26,7 @@ rollback_to() {
   cmd=$(rebuild_cmd)
 
   info "Rolling back to generation ${gen_num}..."
-  $cmd switch --flake ".#${NIXAPPS_SYSTEM}" --switch-generation "$gen_num"
+  $cmd switch --flake ".#${FLAKECTL_SYSTEM}" --switch-generation "$gen_num"
   success "Rollback to generation ${gen_num} complete!"
 }
 

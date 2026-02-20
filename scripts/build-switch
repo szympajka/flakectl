@@ -5,16 +5,16 @@ source "$(dirname "$0")/lib.sh"
 build() {
   export NIXPKGS_ALLOW_UNFREE=1
   info "Starting build..."
-  nix --extra-experimental-features 'nix-command flakes' build ".#${NIXAPPS_FLAKE_ATTR}" "$@"
+  nix --extra-experimental-features 'nix-command flakes' build ".#${FLAKECTL_FLAKE_ATTR}" "$@"
 }
 
 switch() {
   info "Switching to new generation..."
   # darwin needs sudo + local result binary (see https://github.com/nix-darwin/nix-darwin/issues/1457)
-  if [ "$NIXAPPS_PLATFORM" = "darwin" ]; then
-    sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM}" "$@"
+  if [ "$FLAKECTL_PLATFORM" = "darwin" ]; then
+    sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${FLAKECTL_SYSTEM}" "$@"
   else
-    sudo nixos-rebuild switch --flake ".#${NIXAPPS_SYSTEM}" "$@"
+    sudo nixos-rebuild switch --flake ".#${FLAKECTL_SYSTEM}" "$@"
   fi
 
   info "Cleaning up..."

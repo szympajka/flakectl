@@ -3,7 +3,7 @@ set -e
 source "$(dirname "$0")/lib.sh"
 
 get_apps() {
-  nix flake show --json 2>/dev/null | jq -r ".apps.\"${NIXAPPS_SYSTEM}\" | keys[]" | grep -v '^menu$' | sort
+  nix flake show --json 2>/dev/null | jq -r ".apps.\"${FLAKECTL_SYSTEM}\" | keys[]" | grep -v '^menu$' | sort
 }
 
 run_menu() {

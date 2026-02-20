@@ -1,4 +1,4 @@
-# nix-apps
+# flakectl
 
 A configurable app framework for Nix flakes. Provides interactive build, switch, rollback, push, and update workflows with generation tagging and commit suggestions.
 
@@ -10,15 +10,15 @@ Add to your `flake.nix`:
 
 ```nix
 {
-  inputs.nix-apps.url = "github:szympajka/nix-apps";
+  inputs.flakectl.url = "github:szympajka/flakectl";
 
   outputs = inputs:
     inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "aarch64-darwin" ];
-      imports = [ inputs.nix-apps.flakeModule ];
+      imports = [ inputs.flakectl.flakeModule ];
 
       perSystem = { system, ... }: {
-        nix-apps = {
+        flakectl = {
           enable = true;
           buildTarget = "darwinConfigurations.${system}.system";
         };
@@ -45,23 +45,23 @@ Then: `nix run .#menu`, `nix run .#build-switch`, etc.
 ### Pick which built-in apps to include
 
 ```nix
-nix-apps.enabledApps = [ "build-switch" "push" "menu" ];
+flakectl.enabledApps = [ "build-switch" "push" "menu" ];
 ```
 
 ### Add your own apps
 
 ```nix
-nix-apps.extraApps = {
+flakectl.extraApps = {
   deploy = ./apps/deploy;
 };
 ```
 
-Custom apps get the same `PATH` (git, gum, jq) and env vars (`NIXAPPS_SYSTEM`, `NIXAPPS_PLATFORM`, `NIXAPPS_FLAKE_ATTR`). They also appear in the menu automatically.
+Custom apps get the same `PATH` (git, gum, jq) and env vars (`FLAKECTL_SYSTEM`, `FLAKECTL_PLATFORM`, `FLAKECTL_FLAKE_ATTR`). They also appear in the menu automatically.
 
 ### Add extra packages to PATH
 
 ```nix
-nix-apps.extraPackages = [ pkgs.ripgrep ];
+flakectl.extraPackages = [ pkgs.ripgrep ];
 ```
 
 ### Override platform detection
@@ -69,16 +69,16 @@ nix-apps.extraPackages = [ pkgs.ripgrep ];
 Platform is auto-detected (`*-darwin` → darwin, otherwise → nixos), but you can override:
 
 ```nix
-nix-apps.platform = "nixos";
+flakectl.platform = "nixos";
 ```
 
 ## Environment variables available to scripts
 
 | Variable | Description | Example |
 |---|---|---|
-| `NIXAPPS_SYSTEM` | Nix system string | `aarch64-darwin` |
-| `NIXAPPS_PLATFORM` | `darwin` or `nixos` | `darwin` |
-| `NIXAPPS_FLAKE_ATTR` | Flake attribute to build (from `buildTarget`) | `darwinConfigurations.aarch64-darwin.system` |
+| `FLAKECTL_SYSTEM` | Nix system string | `aarch64-darwin` |
+| `FLAKECTL_PLATFORM` | `darwin` or `nixos` | `darwin` |
+| `FLAKECTL_FLAKE_ATTR` | Flake attribute to build (from `buildTarget`) | `darwinConfigurations.aarch64-darwin.system` |
 
 ## Commit suggestion
 
