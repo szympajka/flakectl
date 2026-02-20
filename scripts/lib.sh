@@ -50,7 +50,7 @@ suggest_commit_message() {
     scope=""
   fi
 
-  subjects=$(echo "$changed" | xargs -n1 basename | sed 's/\.nix$//' | sort -u | paste -sd ', ' -)
+  subjects=$(echo "$changed" | xargs -n1 basename | sed 's/\.nix$//' | sort -u | tr '\n' ',' | sed 's/,$//' | sed 's/,/, /g')
   echo "chore${scope}: update ${subjects}"
 }
 
