@@ -1,7 +1,6 @@
 {inputs, ...}: {
   flake-parts,
   lib,
-  self,
   ...
 }: let
   scriptsDir = ./scripts;
@@ -18,15 +17,18 @@ in {
     options.nix-apps = {
       enable = lib.mkEnableOption "nix-apps framework";
 
-      systemType = lib.mkOption {
-        type = lib.types.str;
-        default = system;
-        description = "System type string, e.g. aarch64-darwin. Defaults to the current system.";
-      };
-
       flakeAttr = lib.mkOption {
         type = lib.types.str;
         description = "Flake attribute to build, e.g. darwinConfigurations.aarch64-darwin.system";
+      };
+
+      platform = lib.mkOption {
+        type = lib.types.enum ["darwin" "nixos"];
+        default =
+          if lib.hasSuffix "darwin" system
+          then "darwin"
+          else "nixos";
+        description = "Platform type. Auto-detected from system, but can be overridden.";
       };
 
       enabledApps = lib.mkOption {
@@ -59,9 +61,10 @@ in {
         program = "${(pkgs.writeScriptBin name ''
           #!/usr/bin/env bash
           export PATH=${runtimePath}:$PATH
-          export NIXAPPS_SYSTEM_TYPE=${lib.escapeShellArg cfg.systemType}
+          export NIXAPPS_SYSTEM=${lib.escapeShellArg system}
+          export NIXAPPS_PLATFORM=${lib.escapeShellArg cfg.platform}
           export NIXAPPS_FLAKE_ATTR=${lib.escapeShellArg cfg.flakeAttr}
-          echo "Running ${name} for ${cfg.systemType}"
+          echo "Running ${name} for ${system}"
           exec ${scriptPath} "$@"
         '')}/bin/${name}";
       };

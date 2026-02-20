@@ -18,6 +18,15 @@ require_flake() {
   fi
 }
 
+# Platform-aware rebuild command.
+rebuild_cmd() {
+  case "${NIXAPPS_PLATFORM:-}" in
+    darwin) echo "/run/current-system/sw/bin/darwin-rebuild" ;;
+    nixos)  echo "sudo nixos-rebuild" ;;
+    *)      error "Unknown platform: ${NIXAPPS_PLATFORM:-unset}"; exit 1 ;;
+  esac
+}
+
 # --- Git commit suggestion helpers ---
 
 # Infer scope for a single changed file path.

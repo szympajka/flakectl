@@ -9,11 +9,18 @@ build() {
 }
 
 switch() {
+  local cmd
+  cmd=$(rebuild_cmd)
+
   info "Switching to new generation..."
-  sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM_TYPE}" "$@"
+  if [ "$NIXAPPS_PLATFORM" = "darwin" ]; then
+    sudo ./result/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM}" "$@"
+  else
+    sudo nixos-rebuild switch --flake ".#${NIXAPPS_SYSTEM}" "$@"
+  fi
 
   info "Cleaning up..."
-  unlink ./result
+  unlink ./result 2>/dev/null || true
 }
 
 tag_generation() {

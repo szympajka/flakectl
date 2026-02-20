@@ -3,8 +3,11 @@ set -e
 source "$(dirname "$0")/lib.sh"
 
 select_generation() {
+  local cmd
+  cmd=$(rebuild_cmd)
+
   info "Available generations:"
-  /run/current-system/sw/bin/darwin-rebuild --list-generations
+  $cmd --list-generations
 
   info "Enter the generation number for rollback:"
   read -r GEN_NUM
@@ -19,8 +22,11 @@ select_generation() {
 
 rollback_to() {
   local gen_num="$1"
+  local cmd
+  cmd=$(rebuild_cmd)
+
   info "Rolling back to generation ${gen_num}..."
-  /run/current-system/sw/bin/darwin-rebuild switch --flake ".#${NIXAPPS_SYSTEM_TYPE}" --switch-generation "$gen_num"
+  $cmd switch --flake ".#${NIXAPPS_SYSTEM}" --switch-generation "$gen_num"
   success "Rollback to generation ${gen_num} complete!"
 }
 
