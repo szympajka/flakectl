@@ -68,6 +68,8 @@ flakectl.extraApps = {
 };
 ```
 
+`extraApps` values must be script paths (for example `./apps/deploy`), not inline shell commands.
+
 Custom apps get the same `PATH` (git, gum, jq) and env vars (`FLAKECTL_SYSTEM`, `FLAKECTL_PLATFORM`, `FLAKECTL_FLAKE_ATTR`). They also appear in the menu automatically.
 
 ### Add extra packages to PATH
