@@ -2,6 +2,14 @@
   flake-parts = inputs.flake-parts;
   scriptsDir = ./scripts;
   builtinApps = ["build" "build-switch" "menu" "push" "rollback" "update-flake"];
+  appDescriptions = {
+    menu = "Interactive app picker that auto-discovers flake apps.";
+    build = "Build only (no switch).";
+    "build-switch" = "Build and switch configuration, then tag generation.";
+    rollback = "Roll back to a previous generation.";
+    push = "Review and push local commits to remote.";
+    "update-flake" = "Interactive or CLI-driven flake input updater.";
+  };
 in {
   options.perSystem = flake-parts.lib.mkPerSystemOption ({
     pkgs,
@@ -53,7 +61,7 @@ in {
 
       runtimePath = lib.makeBinPath ([pkgs.git pkgs.gum pkgs.jq] ++ cfg.extraPackages);
 
-      wrapScript = name: scriptPath: let
+      wrapScript = name: scriptPath: description: let
         wrapper = pkgs.writeScriptBin name ''
           #!/usr/bin/env bash
           export PATH=${runtimePath}:$PATH
@@ -66,14 +74,15 @@ in {
       in {
         type = "app";
         program = "${wrapper}/bin/${name}";
+        meta.description = description;
       };
 
       builtinAppSet = lib.listToAttrs (map (name: {
         inherit name;
-        value = wrapScript name "${scriptsDir}/${name}";
+        value = wrapScript name "${scriptsDir}/${name}" appDescriptions.${name};
       }) cfg.enabledApps);
 
-      extraAppSet = lib.mapAttrs (name: path: wrapScript name (toString path)) cfg.extraApps;
+      extraAppSet = lib.mapAttrs (name: path: wrapScript name (toString path) "Custom flakectl app: ${name}.") cfg.extraApps;
     in
       lib.mkIf cfg.enable {
         apps = builtinAppSet // extraAppSet;

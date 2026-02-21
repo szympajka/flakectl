@@ -1,6 +1,10 @@
 # flakectl
 
-A gum-powered menu that runs your Nix flake for you. Build, switch, rollback, push, update: pick from a list, it handles the rest. Tags every generation in git so you can always trace which commit built which system.
+`flakectl` is a menu for your flake apps.
+
+It gives you a gum-powered app picker (`nix run .#menu`) and ships with a useful default set of apps (`build`, `build-switch`, `rollback`, `push`, `update-flake`) so you can use it out of the box.
+
+Under the hood, these are standard first-class flake apps (`apps.<system>.<name>`), so they work with normal `nix run` workflows.
 
 Works with both nix-darwin and NixOS. Platform is auto-detected from your system type.
 
